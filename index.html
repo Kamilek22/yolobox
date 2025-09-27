@@ -2,65 +2,31 @@
 <html lang="pl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Overlay – Tipply Goal (DEBUG)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Overlay – cel donate</title>
   <style>
-    /* Cały ekran, zero kombinacji */
-    html,body{height:100%;margin:0;background:transparent;overflow:hidden;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-
-    /* Debug: pokaż gdzie jest kontener */
-    .goal-wrap{
-      position:fixed;
-      left:2vw;           /* przesuń od lewej */
-      bottom:2vw;         /* przesuń od dołu */
-      transform-origin:bottom left;
-      transform:scale(var(--scale,1));
-      z-index:9999;
-      /* DEBUG: obrys i delikatne tło – usuń jak będzie ok */
-      outline:2px dashed rgba(255,255,255,.6);
-      background:rgba(0,0,0,.05);
-      border-radius:8px;
-      padding:0;
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
     }
 
-    /* Sam iframe – daję większy rozmiar bazowy; skaluj zmienną --scale */
-    iframe{
-      display:block;
-      width:700px;        /* dopasujesz skalą poniżej */
-      height:260px;
-      border:0;
-      background:transparent;
-    }
-
-    /* Mini panel do szybkiej zmiany skali bez edycji kodu (kliknij/stuknij) */
-    .ctrl{
-      position:fixed; right:8px; top:8px; z-index:10000;
-      font-size:12px; line-height:1; color:#fff; background:rgba(0,0,0,.5);
-      padding:6px 8px; border-radius:6px; user-select:none; cursor:pointer;
+    iframe {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border: 0;
+      width: 800px;   /* możesz zmienić wielkość */
+      height: 200px;  /* dopasuj do widgetu */
+      background: transparent;
     }
   </style>
 </head>
 <body>
-  <div class="ctrl" onclick="
-    const r=document.documentElement;
-    const cur=parseFloat(getComputedStyle(r).getPropertyValue('--scale'))||1;
-    const next = cur>=1.6 ? 0.8 : +(cur+0.1).toFixed(1);
-    r.style.setProperty('--scale', next);
-    this.textContent='Skala: '+next;
-  ">Skala: 1.0</div>
-
-  <div class="goal-wrap">
-    <iframe
-      src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b"
-      allow="autoplay; fullscreen; clipboard-read; clipboard-write"
-      allowtransparency="true"
-      scrolling="no">
-    </iframe>
-  </div>
-
-  <!-- Fallback tekstowy (gdyby iframe był blokowany) -->
-  <div style="position:fixed;left:2vw;bottom:2vw;z-index:1;color:#fff;font-size:14px;text-shadow:0 1px 2px rgba(0,0,0,.6)">
-    Jeśli nie widzisz ramki powyżej, przeglądarka na urządzeniu blokuje iframe.
-  </div>
+  <iframe src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b"></iframe>
 </body>
 </html>
