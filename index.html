@@ -1,149 +1,134 @@
-<!-- File: overlays/botrix_tipply_goal.html -->
+<!-- File: overlays/botrix_tipply_goal_v2.html -->
 <!doctype html>
 <html lang="pl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Botrix + Tipply Goal Overlay</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Overlay: Botrix + Tipply Goal</title>
   <style>
-    /* Przezroczyste tło do miksowania w OBS */
-    html, body { margin: 0; padding: 0; background: transparent; height: 100%; overflow: hidden; }
-    #root { position: relative; width: 100vw; height: 100vh; }
+    html,body{margin:0;padding:0;background:transparent;height:100%;overflow:hidden}
+    #root{position:relative;width:100vw;height:100vh}
 
-    /* Botrix zajmuje cały ekran, pod spodem */
-    #botrix {
-      position: absolute; inset: 0; border: 0; z-index: 1;
-      background: transparent;
-    }
+    /* Botrix na spodzie, full */
+    #botrix{position:absolute;inset:0;border:0;background:transparent;z-index:1}
 
-    /* Tipply nad alertami, w rogu; domyślnie TR */
-    #tipply-goal {
-      position: absolute; border: 0; z-index: 2;
-      background: transparent;
-      filter: drop-shadow(0 6px 18px rgba(0,0,0,.35));
-      /* brak pointer-events, bo nie klikamy w OBS */
-      pointer-events: none;
-      transform-origin: top left;
-    }
+    /* Kontener Tipply zawsze nad Botrixem */
+    #tipply-wrap{position:absolute;border:0;background:transparent;z-index:2;pointer-events:none}
 
-    /* Lekka plakietka diagnostyczna */
-    #debug {
-      position: absolute; left: 8px; bottom: 8px; z-index: 99;
-      font: 12px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color: #eee; background: rgba(20,20,20,.7); padding: 6px 8px; border-radius: 8px;
-      display: none;
-    }
+    /* Pełny Tipply (wewnątrz wrapa); skaluje się tylko w trybie crop */
+    #tipply{position:absolute;border:0;background:transparent;left:0;top:0}
+
+    #debug{position:absolute;left:8px;bottom:8px;z-index:99;
+      font:12px system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:#eee;background:rgba(20,20,20,.7);padding:6px 8px;border-radius:8px;display:none}
   </style>
 </head>
 <body>
   <div id="root">
-    <iframe id="botrix" allow="autoplay; clipboard-read; clipboard-write" allowtransparency="true"></iframe>
-    <iframe id="tipply-goal" allow="autoplay" allowtransparency="true"></iframe>
+    <iframe id="botrix" allow="autoplay; clipboard-read; clipboard-write" allowfullscreen></iframe>
+
+    <!-- Wrap pozwala przycinać i pozycjonować Tipply -->
+    <div id="tipply-wrap">
+      <iframe id="tipply" allow="autoplay" allowfullscreen></iframe>
+    </div>
+
     <div id="debug"></div>
   </div>
 
   <script>
-    // Minimalne komentarze "dlaczego": zapewniamy łatwe strojenie w OBS bez edycji pliku.
+    // Dlaczego: Tipply renderuje pełny canvas; najpierw pokazujemy full, a crop jest opcją.
+    const P = new URLSearchParams(location.search);
 
-    const params = new URLSearchParams(location.search);
-
-    // Twoje domyślne linki (można nadpisać parametrami ?botrix=...&goal=...)
     const DEFAULT_BOTRIX = "https://botrix.live/alerts?bid=mImY0SOSfEEnIbMs4UPHNg";
-    const DEFAULT_TIPPLY_GOAL = "https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b";
+    const DEFAULT_TIPPLY = "https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b";
 
-    const botrixUrl = safeUrl(params.get("botrix") || DEFAULT_BOTRIX);
-    const goalUrl   = safeUrl(params.get("goal")   || DEFAULT_TIPPLY_GOAL);
+    const botrixUrl = mustHttp(P.get("botrix") || DEFAULT_BOTRIX);
+    const tipplyUrl = mustHttp(P.get("goal")   || DEFAULT_TIPPLY);
 
-    // Pozycjonowanie i rozmiar celu
-    const goalPos   = (params.get("goalPos") || "top-right").toLowerCase(); // top-right | top-left | bottom-right | bottom-left | custom
-    const goalX     = toNum(params.get("goalX"), 24);   // px od lewej (dla custom) lub od krawędzi wynikowej
-    const goalY     = toNum(params.get("goalY"), 24);   // px od góry (dla custom) lub od krawędzi wynikowej
-    const goalW     = toNum(params.get("goalW"), 420);  // bazowa szerokość
-    const goalH     = toNum(params.get("goalH"), 140);  // bazowa wysokość
-    const goalScale = clamp(toNum(params.get("goalScale"), 1), 0.25, 4);
+    const mode = (P.get("goalMode") || "full").toLowerCase(); // full | crop
+    const viewportW = toNum(P.get("viewportW"), 1920);
+    const viewportH = toNum(P.get("viewportH"), 1080);
 
-    // Debug
-    const debugOn = params.get("debug") === "1";
+    // crop=left,top,width,height (w pikselach, przed skalą)
+    const cropRaw = (P.get("crop") || "").split(",").map(n => Number(n));
+    const crop = (cropRaw.length===4 && cropRaw.every(Number.isFinite))
+      ? { l:cropRaw[0], t:cropRaw[1], w:cropRaw[2], h:cropRaw[3] }
+      : { l:0, t:0, w:viewportW, h:viewportH };
 
-    const botrixIframe = document.getElementById("botrix");
-    const tipplyIframe = document.getElementById("tipply-goal");
-    const debugBox = document.getElementById("debug");
+    const scale = clamp(toNum(P.get("goalScale"), 1), 0.25, 4);
 
-    // Cache-buster (ważne w OBS po zmianach)
-    botrixIframe.src = withCacheBuster(botrixUrl);
-    tipplyIframe.src = withCacheBuster(goalUrl);
+    const pos = (P.get("goalPos") || "top-right").toLowerCase(); // corner for WRAP
+    const offX = toNum(P.get("goalX"), 24);
+    const offY = toNum(P.get("goalY"), 24);
 
-    // Botrix: pełny ekran
-    Object.assign(botrixIframe.style, { width: "100%", height: "100%" });
+    const debugOn = P.get("debug")==="1";
 
-    // Tipply: rozmiar + skala
-    Object.assign(tipplyIframe.style, {
-      width: `${goalW}px`,
-      height: `${goalH}px`,
-      transform: `scale(${goalScale})`
-    });
+    const $botrix = document.getElementById("botrix");
+    const $wrap   = document.getElementById("tipply-wrap");
+    const $tipply = document.getElementById("tipply");
+    const $dbg    = document.getElementById("debug");
 
-    // Ustal rogi lub custom
-    applyCornerPosition(tipplyIframe, goalPos, goalX, goalY);
+    // Ustaw Botrix fullscreen
+    Object.assign($botrix.style, { width:"100%", height:"100%" });
+    $botrix.src = withCB(botrixUrl);
 
-    // Prosty status ładowania (do diagnostyki)
-    let botrixReady = false, tipplyReady = false;
-    botrixIframe.addEventListener("load", () => { botrixReady = true; renderDebug(); }, { once: true });
-    tipplyIframe.addEventListener("load", () => { tipplyReady = true; renderDebug(); }, { once: true });
+    if (mode === "full") {
+      // Tipply na pełny ekran (rekomendowane przez Tipply)
+      Object.assign($wrap.style, { inset:"0", width:"100%", height:"100%" });
+      Object.assign($tipply.style, { width:"100%", height:"100%" });
+    } else {
+      // Tryb crop: viewport Tipply 1920x1080 (lub param), przycinamy prostokąt i skalujemy
+      const wrapW = crop.w * scale;
+      const wrapH = crop.h * scale;
 
-    // Awaryjny reload, jeśli któreś nie wstanie
-    setTimeout(() => {
-      if (!botrixReady) botrixIframe.src = withCacheBuster(botrixUrl);
-      if (!tipplyReady) tipplyIframe.src = withCacheBuster(goalUrl);
-    }, 7000);
+      // Pozycja kontenera do rogu
+      resetEdges($wrap);
+      const [v, h] = pickCorner(pos);
+      $wrap.style[v] = `${offY}px`;
+      $wrap.style[h] = `${offX}px`;
+      Object.assign($wrap.style, {
+        width: `${wrapW}px`,
+        height: `${wrapH}px`,
+        overflow: "hidden"
+      });
 
-    function applyCornerPosition(el, pos, x, y) {
-      const corners = ["top-left","top-right","bottom-left","bottom-right"];
-      // Reset
-      el.style.top = el.style.right = el.style.bottom = el.style.left = "auto";
-
-      if (pos === "custom") { el.style.left = `${x}px`; el.style.top = `${y}px`; return; }
-
-      if (!corners.includes(pos)) pos = "top-right";
-      const [v, h] = pos.split("-");
-      el.style[v] = `${y}px`;
-      el.style[h === "right" ? "right" : "left"] = `${x}px`;
+      // Iframe: cały viewport, przesunięty tak by lewy-górny cropa był w (0,0), skalujemy
+      Object.assign($tipply.style, {
+        width: `${viewportW}px`,
+        height: `${viewportH}px`,
+        left: `${-crop.l}px`,
+        top:  `${-crop.t}px`,
+        transformOrigin: "top left",
+        transform: `scale(${scale})`
+      });
     }
 
-    function withCacheBuster(url) {
-      try {
-        const u = new URL(url);
-        u.searchParams.set("_cb", String(Date.now()));
-        return u.toString();
-      } catch {
-        // W razie braku absolutnego URL (ale tu i tak mamy absolutne)
-        const sep = url.includes("?") ? "&" : "?";
-        return `${url}${sep}_cb=${Date.now()}`;
-      }
+    // Ładuj Tipply
+    $tipply.src = withCB(tipplyUrl);
+
+    // Debug status
+    let botrixReady=false, tipplyReady=false;
+    $botrix.addEventListener("load", ()=>{ botrixReady=true; renderDebug(); }, {once:true});
+    $tipply.addEventListener("load", ()=>{ tipplyReady=true; renderDebug(); }, {once:true});
+
+    // Awaryjny reload
+    setTimeout(()=>{ if(!botrixReady) $botrix.src = withCB(botrixUrl);
+                     if(!tipplyReady) $tipply.src = withCB(tipplyUrl); }, 7000);
+
+    function withCB(u){ try{ const x=new URL(u); x.searchParams.set("_cb", Date.now()); return x.toString(); }
+      catch{ return u + (u.includes("?")?"&":"?") + `_cb=${Date.now()}` } }
+    function mustHttp(u){ if(!/^https?:\/\//i.test(u)) throw new Error("Nieprawidłowy URL"); return u }
+    function toNum(v,f){ const n=Number(v); return Number.isFinite(n)?n:f }
+    function clamp(n,a,b){ return Math.min(b,Math.max(a,n)) }
+    function resetEdges(el){ el.style.top=el.style.right=el.style.bottom=el.style.left="auto" }
+    function pickCorner(p){ return (["top-left","top-right","bottom-left","bottom-right"].includes(p)?p:"top-right").split("-") }
+    function renderDebug(){
+      if(!debugOn) return;
+      $dbg.style.display="block";
+      $dbg.textContent = `Botrix:${botrixReady?"OK":"…"} | Tipply:${tipplyReady?"OK":"…"} | mode:${mode}`;
     }
 
-    function safeUrl(u) {
-      // Prosta ochrona: tylko http(s)
-      if (!/^https?:\/\//i.test(u)) throw new Error("Nieprawidłowy URL.");
-      return u;
-    }
-
-    function toNum(val, fallback) {
-      const n = Number(val);
-      return Number.isFinite(n) ? n : fallback;
-    }
-
-    function clamp(n, min, max) {
-      return Math.min(max, Math.max(min, n));
-    }
-
-    function renderDebug() {
-      if (!debugOn) return;
-      debugBox.style.display = "block";
-      debugBox.textContent = `Botrix: ${botrixReady ? "OK" : "…"} | Tipply Goal: ${tipplyReady ? "OK" : "…"} | ${screen.width}x${screen.height}`;
-    }
-
-    // Uwaga: jeśli któraś usługa zabrania osadzania (X-Frame-Options/CSP), nie obejdziemy tego w przeglądarce/OBS.
+    // Uwaga: jeżeli Tipply zablokuje osadzanie (CSP frame-ancestors/X-Frame-Options), dodaj Tipply jako osobny Browser Source – to jest zgodne z ich instrukcją.
   </script>
 </body>
 </html>
