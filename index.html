@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Overlay do YoloBox</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: transparent;
+    }
+    .overlay {
+      position: absolute;
+      transform: translate(-50%, -50%);
+    }
+    /* Środek ekranu (Botrix + Tipply Alert) */
+    #botrix, #tipply-alert {
+      top: 50%;
+      left: 50%;
+    }
+    /* Cel donate na dole */
+    #tipply-goal {
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      position: absolute;
+    }
+    /* Prawy górny róg = Last Donate */
+    #tipply-last {
+      top: 10px;
+      right: 10px;
+      transform: none;
+    }
+    /* Lewy górny róg = Top 3 Donate */
+    #tipply-top {
+      top: 10px;
+      left: 10px;
+      transform: none;
+    }
+    iframe {
+      border: none;
+      width: 400px;
+      height: 200px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Botrix Alerts -->
+  <iframe id="botrix" class="overlay" src="https://botrix.live/alerts?bid=mImY0SOSfEEnIbMs4UPHNg"></iframe>
+
+  <!-- Tipply Donate Alert -->
+  <iframe id="tipply-alert" class="overlay" src="https://widgets.tipply.pl/TIP_ALERT/45acbc83-f00e-41a6-bbcd-4e8078ae7923"></iframe>
+
+  <!-- Tipply Goal -->
+  <iframe id="tipply-goal" src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b"></iframe>
+
+  <!-- Tipply Last Donate -->
+  <iframe id="tipply-last" src="https://widgets.tipply.pl/LATEST_MESSAGES/45acbc83-f00e-41a6-bbcd-4e8078ae7923/8bb96f04-e8dc-4b7e-8e68-a032c3335840"></iframe>
+
+  <!-- Tipply Top 3 Donate -->
+  <iframe id="tipply-top" src="https://widgets.tipply.pl/LARGEST_MESSAGES/45acbc83-f00e-41a6-bbcd-4e8078ae7923/7e2ac059-e6d8-448f-8a00-99a8bbd85780"></iframe>
+
+</body>
+</html>
