@@ -28,7 +28,7 @@
       transform: translate(-22px, 725px) scale(1);
     }
 
-    /* --- Botrix: alerty (środek ekranu) --- */
+    /* --- Botrix: alerty, idealnie środek ekranu --- */
     .botrix-alerts {
       position: fixed;
       inset: 0;
@@ -40,8 +40,11 @@
     .botrix-alerts iframe {
       border: 0;
       background: transparent;
-      width: 1920px;
+      width: 1920px;   /* pełne płótno */
       height: 1080px;
+      transform-origin: top center;
+      transform: translateY(360px); 
+      /* 1080/2 - ~wysokość alertu (zakładam ~360px żeby wypadł na środek) */
     }
   </style>
 </head>
@@ -67,4 +70,3 @@
   </div>
 </body>
 </html>
-
