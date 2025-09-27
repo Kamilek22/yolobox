@@ -61,6 +61,10 @@
     const offX = toNum(P.get("goalX"), 24);
     const offY = toNum(P.get("goalY"), 24);
 
+    // ważne: stosujemy offset w trybie full tylko jeśli param został jawnie podany
+    const hasOffX = P.has("goalX");
+    const hasOffY = P.has("goalY");
+
     const debugOn = P.get("debug")==="1";
 
     const $botrix = document.getElementById("botrix");
@@ -75,7 +79,19 @@
     if (mode === "full") {
       // Tipply na pełny ekran (rekomendowane przez Tipply)
       Object.assign($wrap.style, { inset:"0", width:"100%", height:"100%" });
-      Object.assign($tipply.style, { width:"100%", height:"100%" });
+
+      // Przesunięcie w trybie full tylko gdy jawnie podano goalX/goalY,
+      // by nie psuć dotychczasowego wyglądu (domyślne 24px ignorujemy).
+      const leftPx = hasOffX ? offX : 0;
+      const topPx  = hasOffY ? offY : 0;
+
+      // Uwaga: zmniejszamy szer/wys o offset, aby uniknąć wychodzenia poza viewport.
+      Object.assign($tipply.style, {
+        width:  hasOffX ? `calc(100% - ${leftPx}px)` : "100%",
+        height: hasOffY ? `calc(100% - ${topPx}px)`  : "100%",
+        left:   `${leftPx}px`,
+        top:    `${topPx}px`
+      });
     } else {
       // Tryb crop: viewport Tipply 1920x1080 (lub param), przycinamy prostokąt i skalujemy
       const wrapW = crop.w * scale;
