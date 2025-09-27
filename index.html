@@ -11,10 +11,12 @@
       overflow: hidden; 
     }
 
-    /* --- Tipply: cel donate (teraz dół, centralnie) --- */
+    /* --- Tipply: cel donate (prawy dół, ustalone) --- */
     .tipply-goal {
       position: fixed;
       inset: 0;
+      display: grid;
+      place-items: center;
       pointer-events: none;
     }
     .tipply-goal iframe {
@@ -22,13 +24,11 @@
       background: transparent;
       width: 1920px;
       height: 1080px;
-      position: absolute;
-      left: 50%;
-      bottom: 0;
-      transform: translateX(-50%) scale(1);
+      transform-origin: top left;
+      transform: translate(-22px, 725px) scale(1);
     }
 
-    /* --- Botrix: alerty, środek ekranu --- */
+    /* --- Botrix: alerty, idealnie środek ekranu --- */
     .botrix-alerts {
       position: fixed;
       inset: 0;
@@ -40,13 +40,13 @@
     .botrix-alerts iframe {
       border: 0;
       background: transparent;
-      width: 1920px;
+      width: 1920px;   /* pełne płótno */
       height: 1080px;
       transform-origin: top center;
       transform: translateY(360px); 
     }
 
-    /* --- Tipply: powiadomienie donate --- */
+    /* --- Tipply: powiadomienie donate (tak samo jak Botrix) --- */
     .tipply-alert {
       position: fixed;
       inset: 0;
@@ -66,7 +66,7 @@
   </style>
 </head>
 <body>
-  <!-- Tipply goal (środek, dół) -->
+  <!-- Tipply goal (prawy dół) -->
   <div class="tipply-goal">
     <iframe
       src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b"
