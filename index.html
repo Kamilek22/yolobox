@@ -1,31 +1,66 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <title>Overlay</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Overlay 1080p – multi alerts</title>
   <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: transparent;
-      width: 1920px;
-      height: 1080px;
-    }
-    iframe {
-      position: absolute;
-      border: none;
-      background: transparent;
-    }
-    #goal {
-      bottom: 0px;
-      left: 0px;
-      width: 500px;
-      height: 80px;
-    }
+    html,body{height:100%;margin:0;background:transparent;overflow:hidden}
+    .stage-wrap{position:fixed;inset:0;display:grid;place-items:center;background:transparent}
+    .stage{position:relative;width:1920px;height:1080px;transform-origin:center center; background:transparent}
+    .tl{position:absolute;left:32px;top:32px}
+    .tr{position:absolute;right:32px;top:32px}
+    .bl{position:absolute;left:32px;bottom:32px}
+    .br{position:absolute;right:32px;bottom:32px}
+    .center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+    .alert{border:0;background:transparent;pointer-events:none}
+    .w300h80{width:300px;height:80px}
+    .w480h120{width:480px;height:120px}
+    .w640h360{width:640px;height:360px}
   </style>
 </head>
 <body>
-  <iframe id="goal" src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b"></iframe>
+  <div class="stage-wrap">
+    <div class="stage" id="stage">
+      
+      <!-- CEL DONATE – lewy dół -->
+      <iframe class="alert bl w480h120"
+        src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b">
+      </iframe>
+
+      <!-- TOP DONATE – lewy górny -->
+      <iframe class="alert tl w300h80"
+        src="https://widgets.tipply.pl/LARGEST_MESSAGES/45acbc83-f00e-41a6-bbcd-4e8078ae7923/7e2ac059-e6d8-448f-8a00-99a8bbd85780">
+      </iframe>
+
+      <!-- LAST DONATE – prawy dół -->
+      <iframe class="alert br w300h80"
+        src="https://widgets.tipply.pl/LATEST_MESSAGES/45acbc83-f00e-41a6-bbcd-4e8078ae7923/8bb96f04-e8dc-4b7e-8e68-a032c3335840">
+      </iframe>
+
+      <!-- ALERT POP-UP (Tipply) – środek -->
+      <iframe class="alert center w640h360"
+        src="https://widgets.tipply.pl/TIP_ALERT/45acbc83-f00e-41a6-bbcd-4e8078ae7923">
+      </iframe>
+
+      <!-- BOTRIX ALERT – środek nad Tipply -->
+      <iframe class="alert center w640h360" style="transform:translate(-50%,-50%) translateY(-60px); z-index:5"
+        src="https://botrix.live/alerts?bid=mImY0SOSfEEnIbMs4UPHNg">
+      </iframe>
+
+    </div>
+  </div>
+
+  <script>
+    function fit() {
+      const stage = document.getElementById('stage');
+      const sw = 1920, sh = 1080;
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const scale = Math.min(vw / sw, vh / sh);
+      stage.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', fit);
+    fit();
+  </script>
 </body>
 </html>
-
