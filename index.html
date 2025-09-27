@@ -48,7 +48,6 @@
 
     const offX = toNum(P.get("goalX"), 0);
     const offY = toNum(P.get("goalY"), 0);
-
     const debugOn = P.get("debug")==="1";
 
     const $botrix = document.getElementById("botrix");
@@ -59,22 +58,36 @@
     Object.assign($botrix.style, { width:"100%", height:"100%" });
     $botrix.src = withCB(botrixUrl);
 
-    if (mode === "full") {
-      // Dlaczego: nie możemy modyfikować DOM w iframe; przesuwamy cały iframe Tipply.
+    const offsetActive = (mode === "full") && (offX !== 0 || offY !== 0);
+
+    if (offsetActive) {
+      // Dlaczego: OBS/CEF bywa oporny na translate na pełnym iframie – używamy „crop-like” bez cięcia.
+      const wrapW = viewportW * scale;
+      const wrapH = viewportH * scale;
+
+      resetEdges($wrap);
+      $wrap.style.top  = `${offY}px`;
+      $wrap.style.left = `${offX}px`;
       Object.assign($wrap.style, {
-        inset:"0", width:"100%", height:"100%", overflow:"visible"
+        width: `${wrapW}px`,
+        height: `${wrapH}px`,
+        overflow: "hidden"
       });
 
-      // Wymuszamy transform z !important w razie styli osadzonych przez Tipply.
-      setImportant($tipply, {
-        width: "100%",
-        height: "100%",
+      Object.assign($tipply.style, {
+        width: `${viewportW}px`,
+        height: `${viewportH}px`,
         left: "0px",
-        top: "0px",
-        "transform-origin": "top left",
-        "transform": `translate(${offX}px, ${offY}px)`
+        top:  "0px",
+        transformOrigin: "top left",
+        transform: `scale(${scale})`
       });
+    } else if (mode === "full") {
+      // Pełny ekran bez przesunięcia
+      Object.assign($wrap.style, { inset:"0", width:"100%", height:"100%" });
+      Object.assign($tipply.style, { width:"100%", height:"100%" });
     } else {
+      // Tryb crop oryginalny
       const wrapW = crop.w * scale;
       const wrapH = crop.h * scale;
 
@@ -82,7 +95,11 @@
       const [v, h] = pickCorner(pos);
       $wrap.style[v] = `${toNum(P.get("goalY"), 24)}px`;
       $wrap.style[h] = `${toNum(P.get("goalX"), 24)}px`;
-      Object.assign($wrap.style, { width:`${wrapW}px`, height:`${wrapH}px`, overflow:"hidden" });
+      Object.assign($wrap.style, {
+        width: `${wrapW}px`,
+        height: `${wrapH}px`,
+        overflow: "hidden"
+      });
 
       Object.assign($tipply.style, {
         width: `${viewportW}px`,
@@ -110,14 +127,11 @@
     function clamp(n,a,b){ return Math.min(b,Math.max(a,n)) }
     function resetEdges(el){ el.style.top=el.style.right=el.style.bottom=el.style.left="auto" }
     function pickCorner(p){ return (["top-left","top-right","bottom-left","bottom-right"].includes(p)?p:"top-right").split("-") }
-    function setImportant(el, obj){ for(const [k,v] of Object.entries(obj)) el.style.setProperty(k, v, "important"); }
     function renderDebug(){
       if(!debugOn) return;
       $dbg.style.display="block";
-      $dbg.textContent = `Botrix:${botrixReady?"OK":"…"} | Tipply:${tipplyReady?"OK":"…"} | mode:${mode} | offset:${offX}x${offY}`;
+      $dbg.textContent = `Botrix:${botrixReady?"OK":"…"} | Tipply:${tipplyReady?"OK":"…"} | mode:${mode}${offsetActive?"(offset)":""} | off:${offX}x${offY}`;
     }
-
-    // Jeżeli Tipply zablokuje osadzanie (CSP), dodaj Tipply jako osobny Browser Source – to zgodne z ich instrukcją.
   </script>
 </body>
 </html>
