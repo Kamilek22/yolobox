@@ -3,78 +3,36 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tipply – Cel donate (crop + debug)</title>
+  <title>Tipply – Cel donate</title>
   <style>
-    :root{
-      /* --- USTAWIENIA --- */
-      --debug: 1;     /* 1 = włączone obramowania/tło pomocnicze, 0 = wyłącz */
-      --scale: 1;     /* powiększenie/zmniejszenie widgetu */
-      --shift-x: 0;   /* przesunięcie zawartości w poziomie (px) */
-      --shift-y: 0;   /* przesunięcie zawartości w pionie (px) */
+    body { margin:0; background:transparent; overflow:hidden; }
 
-      /* docelowe wymiary widocznego paska (po namierzeniu) */
-      --crop-w: 520px;
-      --crop-h: 140px;
-    }
-
-    body{ margin:0; background:transparent; overflow:hidden; }
-
-    /* KROK 1: duże okno podglądu, żeby „namierzyć” pasek */
-    .stage{
+    .goal {
       position: fixed;
-      inset: 20px;             /* zostaw ramkę dookoła widoku */
-      overflow: hidden;
-      pointer-events: none;
-      background: rgba(0,0,0, calc(var(--debug)));  /* szare tło w debug */
-      outline: calc(var(--debug)) solid 2px red;     /* rama debug */
-    }
-
-    /* iframe – duże płótno, które przesuwamy i skalujemy */
-    .stage iframe{
-      position: absolute;
-      top: 0; left: 0;
-      width: 1920px;   /* „płótno” – przyjmijmy fullHD */
-      height: 1080px;
-      border: 0;
-      background: transparent;
-      transform-origin: top left;
-      transform:
-        translate(calc(var(--shift-x) * 1px), calc(var(--shift-y) * 1px))
-        scale(var(--scale));
-      outline: calc(var(--debug)) dashed 1px yellow; /* kontur iframe w debug */
-    }
-
-    /* KROK 2: po namierzeniu – wrzuć do rogu i przytnij */
-    .bottom-right{
-      position: fixed;
-      right: 20px;
+      right: 20px;    /* zmień na left:20px; jeśli chcesz lewy dół */
       bottom: 20px;
-      width: var(--crop-w);
-      height: var(--crop-h);
+      width: 520px;   /* szerokość widocznego paska */
+      height: 140px;  /* wysokość widocznego paska */
       overflow: hidden;
       pointer-events: none;
-      background: rgba(255,0,0, calc(var(--debug)*0.15)); /* lekkie tło w debug */
-      outline: calc(var(--debug)) solid 1px #ff5252;
-      display: none; /* włączysz po namierzeniu */
     }
-    .bottom-right iframe{
+
+    .goal iframe {
       position: absolute;
       top: 0; left: 0;
-      width: 1920px;
+      width: 1920px;   /* zakładamy płótno fullHD */
       height: 1080px;
       border: 0;
       background: transparent;
       transform-origin: top left;
-      transform:
-        translate(calc(var(--shift-x) * 1px), calc(var(--shift-y) * 1px))
-        scale(var(--scale));
+
+      /* Twoje wartości z debug */
+      transform: translate(-22px, 685px) scale(1);
     }
   </style>
 </head>
 <body>
-
-  <!-- KROK 1: NAMIERZANIE -->
-  <div class="stage">
+  <div class="goal">
     <iframe
       src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b"
       allowtransparency="true"
@@ -82,43 +40,5 @@
       referrerpolicy="no-referrer">
     </iframe>
   </div>
-
-  <!-- KROK 2: DOCIĘTY RÓG (na razie wyłączony display:none) -->
-  <div class="bottom-right">
-    <iframe
-      src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b"
-      allowtransparency="true"
-      scrolling="no"
-      referrerpolicy="no-referrer">
-    </iframe>
-  </div>
-
-  <script>
-    // Szybkie sterowanie z klawiatury w trybie debug:
-    // Strzałki = przesuwaj, Shift = 10px, Ctrl = 1px, bez modyfikatora = 5px
-    // + / - = skala
-    document.addEventListener('keydown', e => {
-      const rs = getComputedStyle(document.documentElement);
-      const sx = parseFloat(rs.getPropertyValue('--shift-x')) || 0;
-      const sy = parseFloat(rs.getPropertyValue('--shift-y')) || 0;
-      const sc = parseFloat(rs.getPropertyValue('--scale')) || 1;
-      const step = e.shiftKey ? 10 : (e.ctrlKey ? 1 : 5);
-      let nx = sx, ny = sy, ns = sc;
-
-      if (e.key === 'ArrowLeft')  nx = sx - step;
-      if (e.key === 'ArrowRight') nx = sx + step;
-      if (e.key === 'ArrowUp')    ny = sy - step;
-      if (e.key === 'ArrowDown')  ny = sy + step;
-      if (e.key === '+')          ns = +(sc + 0.05).toFixed(2);
-      if (e.key === '-')          ns = +(sc - 0.05).toFixed(2);
-
-      if (nx!==sx || ny!==sy || ns!==sc) {
-        document.documentElement.style.setProperty('--shift-x', nx);
-        document.documentElement.style.setProperty('--shift-y', ny);
-        document.documentElement.style.setProperty('--scale', ns);
-        e.preventDefault();
-      }
-    });
-  </script>
 </body>
 </html>
