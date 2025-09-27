@@ -5,18 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tipply – Cel donate</title>
   <style>
-    /* Twój CSS dla strony-–transparentne tło, brak scrolli */
-    body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }
+    body { 
+      background-color: rgba(0, 0, 0, 0); 
+      margin: 0px auto; 
+      overflow: hidden; 
+    }
 
-    /* Kontener na iframe – zajmuje cały ekran */
-    .root { position: fixed; inset: 0; display: grid; place-items: center; }
+    .root { 
+      position: fixed; 
+      inset: 0; 
+      display: grid; 
+      place-items: center; 
+    }
 
-    /* Sam iframe – bez ramek, dopasowany do zawartości */
     iframe {
       border: 0;
       background: transparent;
-      width: 100vw;
-      height: 100vh;
+      width: 1920px;   /* pełne płótno Tipply */
+      height: 1080px;
+      transform-origin: top left;
+      transform: translate(-22px, 685px) scale(1); /* <<< Twoje wartości */
     }
   </style>
 </head>
