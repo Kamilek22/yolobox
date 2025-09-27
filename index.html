@@ -6,12 +6,12 @@
   <title>Overlay – Tipply + Botrix</title>
   <style>
     body { 
-      background-color: rgba(0, 0, 0, 0); 
-      margin: 0px auto; 
+      background-color: rgba(0,0,0,0); 
+      margin: 0; 
       overflow: hidden; 
     }
 
-    /* --- Tipply: cel donate (ustawione na stałe) --- */
+    /* --- Tipply: cel donate (prawy dół, ustalone) --- */
     .tipply-goal {
       position: fixed;
       inset: 0;
@@ -28,19 +28,23 @@
       transform: translate(-22px, 725px) scale(1);
     }
 
-    /* --- Botrix: alerty (na środku) --- */
+    /* --- Botrix: alerty, idealnie środek ekranu --- */
     .botrix-alerts {
       position: fixed;
       inset: 0;
-      display: grid;
-      place-items: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       pointer-events: none;
     }
     .botrix-alerts iframe {
       border: 0;
       background: transparent;
-      width: 100vw;
-      height: 100vh;
+      width: 1920px;   /* pełne płótno */
+      height: 1080px;
+      transform-origin: top center;
+      transform: translateY(360px); 
+      /* 1080/2 - ~wysokość alertu (zakładam ~360px żeby wypadł na środek) */
     }
   </style>
 </head>
