@@ -2,65 +2,115 @@
 <html lang="pl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Overlay 1080p – multi alerts</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Overlay IRL – jeden URL</title>
   <style>
-    html,body{height:100%;margin:0;background:transparent;overflow:hidden}
-    .stage-wrap{position:fixed;inset:0;display:grid;place-items:center;background:transparent}
-    .stage{position:relative;width:1920px;height:1080px;transform-origin:center center; background:transparent}
-    .tl{position:absolute;left:32px;top:32px}
-    .tr{position:absolute;right:32px;top:32px}
-    .bl{position:absolute;left:32px;bottom:32px}
-    .br{position:absolute;right:32px;bottom:32px}
-    .center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
-    .alert{border:0;background:transparent;pointer-events:none}
-    .w300h80{width:300px;height:80px}
-    .w480h120{width:480px;height:120px}
-    .w640h360{width:640px;height:360px}
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: transparent;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    .root { position: fixed; inset: 0; display: grid; place-items: center; }
+    .canvas {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      transform-origin: top left;
+      background: transparent;
+    }
+
+    .box { position: absolute; pointer-events: auto; background: transparent; }
+
+    /* Rogi i centrum */
+    .top-left     { left: 24px;  top: 24px; }
+    .bottom-left  { left: 24px;  bottom: 24px; }
+    .bottom-right { right: 24px; bottom: 24px; }
+    .center       { left: 50%;  top: 50%; transform: translate(-50%, -50%); }
+
+    .w-medium { width: 620px; height: 160px; }
+    .w-wide   { width: 900px; height: 240px; }
+    .w-small  { width: 520px; height: 140px; }
+
+    .cover-full { left: 50%; top: 50%; width: 1920px; height: 1080px; transform: translate(-50%, -50%); }
+
+    .box iframe {
+      width: 100%; height: 100%; border: 0; background: transparent;
+    }
+
+    #tipAlert  { z-index: 30; }
+    #botrix    { z-index: 20; }
+    #topDonate { z-index: 10; }
+    #lastDonate{ z-index: 10; }
+    #goal      { z-index: 10; }
   </style>
 </head>
 <body>
-  <div class="stage-wrap">
-    <div class="stage" id="stage">
-      
-      <!-- CEL DONATE – lewy dół -->
-      <iframe class="alert bl w480h120"
-        src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b">
-      </iframe>
+  <div class="root">
+    <div id="canvas" class="canvas">
 
-      <!-- TOP DONATE – lewy górny -->
-      <iframe class="alert tl w300h80"
-        src="https://widgets.tipply.pl/LARGEST_MESSAGES/45acbc83-f00e-41a6-bbcd-4e8078ae7923/7e2ac059-e6d8-448f-8a00-99a8bbd85780">
-      </iframe>
+      <!-- BOTRIX – wyśrodkowany na pełnym obszarze -->
+      <div id="botrix" class="box cover-full">
+        <iframe title="Botrix Alerts"
+          src="https://botrix.live/alerts?bid=mImY0SOSfEEnIbMs4UPHNg"
+          allow="autoplay; clipboard-read; clipboard-write"
+          referrerpolicy="no-referrer"
+          allowtransparency="true"></iframe>
+      </div>
 
-      <!-- LAST DONATE – prawy dół -->
-      <iframe class="alert br w300h80"
-        src="https://widgets.tipply.pl/LATEST_MESSAGES/45acbc83-f00e-41a6-bbcd-4e8078ae7923/8bb96f04-e8dc-4b7e-8e68-a032c3335840">
-      </iframe>
+      <!-- TIP ALERT – wyśrodkowany na pełnym obszarze -->
+      <div id="tipAlert" class="box cover-full">
+        <iframe title="Tipply Tip Alert"
+          src="https://widgets.tipply.pl/TIP_ALERT/45acbc83-f00e-41a6-bbcd-4e8078ae7923"
+          allow="autoplay; clipboard-read; clipboard-write; microphone; speakers"
+          referrerpolicy="no-referrer"
+          allowtransparency="true"></iframe>
+      </div>
 
-      <!-- ALERT POP-UP (Tipply) – środek -->
-      <iframe class="alert center w640h360"
-        src="https://widgets.tipply.pl/TIP_ALERT/45acbc83-f00e-41a6-bbcd-4e8078ae7923">
-      </iframe>
+      <!-- TOP DONATE – lewy górny róg -->
+      <div id="topDonate" class="box top-left" style="width: 820px; height: 220px;">
+        <iframe title="Tipply Top Donate"
+          src="https://widgets.tipply.pl/LARGEST_MESSAGES/45acbc83-f00e-41a6-bbcd-4e8078ae7923/7e2ac059-e6d8-448f-8a00-99a8bbd85780"
+          allow="autoplay; clipboard-read; clipboard-write"
+          referrerpolicy="no-referrer"
+          allowtransparency="true"></iframe>
+      </div>
 
-      <!-- BOTRIX ALERT – środek nad Tipply -->
-      <iframe class="alert center w640h360" style="transform:translate(-50%,-50%) translateY(-60px); z-index:5"
-        src="https://botrix.live/alerts?bid=mImY0SOSfEEnIbMs4UPHNg">
-      </iframe>
+      <!-- LAST DONATE – prawy dolny róg -->
+      <div id="lastDonate" class="box bottom-right" style="width: 560px; height: 140px; bottom: -16px;">
+        <iframe title="Tipply Last Donate"
+          src="https://widgets.tipply.pl/LATEST_MESSAGES/45acbc83-f00e-41a6-bbcd-4e8078ae7923/8bb96f04-e8dc-4b7e-8e68-a032c3335840"
+          allow="autoplay; clipboard-read; clipboard-write"
+          referrerpolicy="no-referrer"
+          allowtransparency="true"></iframe>
+      </div>
+
+      <!-- CEL DONATE – lewy dolny róg -->
+      <div id="goal" class="box bottom-left w-small">
+        <iframe title="Tipply Goal"
+          src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b"
+          allow="autoplay; clipboard-read; clipboard-write"
+          referrerpolicy="no-referrer"
+          allowtransparency="true"></iframe>
+      </div>
 
     </div>
   </div>
 
   <script>
-    function fit() {
-      const stage = document.getElementById('stage');
-      const sw = 1920, sh = 1080;
-      const vw = window.innerWidth, vh = window.innerHeight;
-      const scale = Math.min(vw / sw, vh / sh);
-      stage.style.transform = `scale(${scale})`;
-    }
-    window.addEventListener('resize', fit);
-    fit();
+    (function() {
+      const canvas = document.getElementById('canvas');
+      function fit() {
+        const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+        const x = (window.innerWidth  - 1920 * scale) / 2;
+        const y = (window.innerHeight - 1080 * scale) / 2;
+        canvas.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+      }
+      window.addEventListener('resize', fit);
+      fit();
+    })();
   </script>
 </body>
 </html>
