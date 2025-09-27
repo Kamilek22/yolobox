@@ -36,7 +36,7 @@
   </div>
 
   <script>
-    // Dlaczego: Tipply renderuje pełny canvas; najpierw pokazujemy full, a crop jest opcją.
+    // Tipply renderuje pełny canvas; full = pokazujemy pełny, crop = przycinamy i skalujemy.
     const P = new URLSearchParams(location.search);
 
     const DEFAULT_BOTRIX = "https://botrix.live/alerts?bid=mImY0SOSfEEnIbMs4UPHNg";
@@ -57,13 +57,9 @@
 
     const scale = clamp(toNum(P.get("goalScale"), 1), 0.25, 4);
 
-    const pos = (P.get("goalPos") || "top-right").toLowerCase(); // corner for WRAP
-    const offX = toNum(P.get("goalX"), 24);
-    const offY = toNum(P.get("goalY"), 24);
-
-    // ważne: stosujemy offset w trybie full tylko jeśli param został jawnie podany
-    const hasOffX = P.has("goalX");
-    const hasOffY = P.has("goalY");
+    const pos  = (P.get("goalPos") || "top-right").toLowerCase(); // corner for WRAP (crop)
+    const offX = toNum(P.get("goalX"), 0);   // domyślnie 0
+    const offY = toNum(P.get("goalY"), 0);   // domyślnie 0
 
     const debugOn = P.get("debug")==="1";
 
@@ -72,32 +68,33 @@
     const $tipply = document.getElementById("tipply");
     const $dbg    = document.getElementById("debug");
 
-    // Ustaw Botrix fullscreen
+    // Botrix fullscreen
     Object.assign($botrix.style, { width:"100%", height:"100%" });
     $botrix.src = withCB(botrixUrl);
 
     if (mode === "full") {
-      // Tipply na pełny ekran (rekomendowane przez Tipply)
-      Object.assign($wrap.style, { inset:"0", width:"100%", height:"100%" });
+      // Wrap pełnoekranowy, ale przesuwamy go transformatą
+      Object.assign($wrap.style, {
+        inset: "0",
+        width: "100%",
+        height: "100%",
+        overflow: "visible",
+        transformOrigin: "top left",
+        transform: `translate(${offX}px, ${offY}px)` // << kluczowe przesunięcie
+      });
 
-      // Przesunięcie w trybie full tylko gdy jawnie podano goalX/goalY,
-      // by nie psuć dotychczasowego wyglądu (domyślne 24px ignorujemy).
-      const leftPx = hasOffX ? offX : 0;
-      const topPx  = hasOffY ? offY : 0;
-
-      // Uwaga: zmniejszamy szer/wys o offset, aby uniknąć wychodzenia poza viewport.
+      // Iframe Tipply wypełnia wrap bez dodatkowych offsetów
       Object.assign($tipply.style, {
-        width:  hasOffX ? `calc(100% - ${leftPx}px)` : "100%",
-        height: hasOffY ? `calc(100% - ${topPx}px)`  : "100%",
-        left:   `${leftPx}px`,
-        top:    `${topPx}px`
+        width: "100%",
+        height: "100%",
+        left: "0",
+        top: "0"
       });
     } else {
       // Tryb crop: viewport Tipply 1920x1080 (lub param), przycinamy prostokąt i skalujemy
       const wrapW = crop.w * scale;
       const wrapH = crop.h * scale;
 
-      // Pozycja kontenera do rogu
       resetEdges($wrap);
       const [v, h] = pickCorner(pos);
       $wrap.style[v] = `${offY}px`;
@@ -108,7 +105,6 @@
         overflow: "hidden"
       });
 
-      // Iframe: cały viewport, przesunięty tak by lewy-górny cropa był w (0,0), skalujemy
       Object.assign($tipply.style, {
         width: `${viewportW}px`,
         height: `${viewportH}px`,
@@ -127,7 +123,7 @@
     $botrix.addEventListener("load", ()=>{ botrixReady=true; renderDebug(); }, {once:true});
     $tipply.addEventListener("load", ()=>{ tipplyReady=true; renderDebug(); }, {once:true});
 
-    // Awaryjny reload
+    // Awaryjny reload (czasem overlay nie strzela 'load' przez CSP)
     setTimeout(()=>{ if(!botrixReady) $botrix.src = withCB(botrixUrl);
                      if(!tipplyReady) $tipply.src = withCB(tipplyUrl); }, 7000);
 
@@ -141,10 +137,10 @@
     function renderDebug(){
       if(!debugOn) return;
       $dbg.style.display="block";
-      $dbg.textContent = `Botrix:${botrixReady?"OK":"…"} | Tipply:${tipplyReady?"OK":"…"} | mode:${mode}`;
+      $dbg.textContent = `Botrix:${botrixReady?"OK":"…"} | Tipply:${tipplyReady?"OK":"…"} | mode:${mode} | shift:${offX}x${offY}`;
     }
 
-    // Uwaga: jeżeli Tipply zablokuje osadzanie (CSP frame-ancestors/X-Frame-Options), dodaj Tipply jako osobny Browser Source – to jest zgodne z ich instrukcją.
+    // Jeżeli Tipply zablokuje osadzanie (CSP), dodaj Tipply jako osobny Browser Source – zgodnie z ich instrukcją.
   </script>
 </body>
 </html>
