@@ -40,14 +40,13 @@
     .botrix-alerts iframe {
       border: 0;
       background: transparent;
-      width: 1920px;
+      width: 1920px;   /* pełne płótno */
       height: 1080px;
       transform-origin: top center;
       transform: translateY(360px); 
-      /* 1080/2 - ~wysokość alertu (zakładam ~360px żeby wypadł na środek) */
     }
 
-    /* --- Tipply: powiadomienie donate (też środek) --- */
+    /* --- Tipply: powiadomienie donate (tak samo jak Botrix) --- */
     .tipply-alert {
       position: fixed;
       inset: 0;
@@ -61,6 +60,8 @@
       background: transparent;
       width: 1920px;
       height: 1080px;
+      transform-origin: top center;
+      transform: translateY(360px);
     }
   </style>
 </head>
