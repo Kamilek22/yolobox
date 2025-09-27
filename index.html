@@ -28,7 +28,7 @@
       transform: translate(-22px, 725px) scale(1);
     }
 
-    /* --- Botrix: alerty, idealnie środek ekranu --- */
+    /* --- Botrix: alerty (środek ekranu) --- */
     .botrix-alerts {
       position: fixed;
       inset: 0;
@@ -40,11 +40,24 @@
     .botrix-alerts iframe {
       border: 0;
       background: transparent;
-      width: 1920px;   /* pełne płótno */
+      width: 1920px;
       height: 1080px;
-      transform-origin: top center;
-      transform: translateY(360px); 
-      /* 1080/2 - ~wysokość alertu (zakładam ~360px żeby wypadł na środek) */
+    }
+
+    /* --- Tipply: tip alert (środek ekranu) --- */
+    .tipply-alert {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    .tipply-alert iframe {
+      border: 0;
+      background: transparent;
+      width: 1920px;
+      height: 1080px;
     }
   </style>
 </head>
@@ -68,5 +81,16 @@
       referrerpolicy="no-referrer">
     </iframe>
   </div>
+
+  <!-- Tipply tip alert -->
+  <div class="tipply-alert">
+    <iframe
+      src="https://widgets.tipply.pl/TIP_ALERT/45acbc83-f00e-41a6-bbcd-4e8078ae7923"
+      allowtransparency="true"
+      scrolling="no"
+      referrerpolicy="no-referrer">
+    </iframe>
+  </div>
 </body>
 </html>
+
