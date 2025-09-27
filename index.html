@@ -1,116 +1,149 @@
+<!-- File: overlays/botrix_tipply_goal.html -->
 <!doctype html>
 <html lang="pl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Overlay IRL – jeden URL</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Botrix + Tipply Goal Overlay</title>
   <style>
-    html, body { height: 100%; }
-    body {
-      margin: 0;
+    /* Przezroczyste tło do miksowania w OBS */
+    html, body { margin: 0; padding: 0; background: transparent; height: 100%; overflow: hidden; }
+    #root { position: relative; width: 100vw; height: 100vh; }
+
+    /* Botrix zajmuje cały ekran, pod spodem */
+    #botrix {
+      position: absolute; inset: 0; border: 0; z-index: 1;
       background: transparent;
-      overflow: hidden;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
 
-    .root { position: fixed; inset: 0; display: grid; place-items: center; }
-    .canvas {
-      position: relative;
-      width: 1920px;
-      height: 1080px;
+    /* Tipply nad alertami, w rogu; domyślnie TR */
+    #tipply-goal {
+      position: absolute; border: 0; z-index: 2;
+      background: transparent;
+      filter: drop-shadow(0 6px 18px rgba(0,0,0,.35));
+      /* brak pointer-events, bo nie klikamy w OBS */
+      pointer-events: none;
       transform-origin: top left;
-      background: transparent;
     }
 
-    .box { position: absolute; pointer-events: auto; background: transparent; }
-
-    /* Rogi i centrum */
-    .top-left     { left: 24px;  top: 24px; }
-    .bottom-left  { left: 24px;  bottom: 24px; }
-    .bottom-right { right: 24px; bottom: 24px; }
-    .center       { left: 50%;  top: 50%; transform: translate(-50%, -50%); }
-
-    .w-medium { width: 620px; height: 160px; }
-    .w-wide   { width: 900px; height: 240px; }
-    .w-small  { width: 520px; height: 140px; }
-
-    .cover-full { left: 50%; top: 50%; width: 1920px; height: 1080px; transform: translate(-50%, -50%); }
-
-    .box iframe {
-      width: 100%; height: 100%; border: 0; background: transparent;
+    /* Lekka plakietka diagnostyczna */
+    #debug {
+      position: absolute; left: 8px; bottom: 8px; z-index: 99;
+      font: 12px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: #eee; background: rgba(20,20,20,.7); padding: 6px 8px; border-radius: 8px;
+      display: none;
     }
-
-    #tipAlert  { z-index: 30; }
-    #botrix    { z-index: 20; }
-    #topDonate { z-index: 10; }
-    #lastDonate{ z-index: 10; }
-    #goal      { z-index: 10; }
   </style>
 </head>
 <body>
-  <div class="root">
-    <div id="canvas" class="canvas">
-
-      <!-- BOTRIX – wyśrodkowany na pełnym obszarze -->
-      <div id="botrix" class="box cover-full">
-        <iframe title="Botrix Alerts"
-          src="https://botrix.live/alerts?bid=mImY0SOSfEEnIbMs4UPHNg"
-          allow="autoplay; clipboard-read; clipboard-write"
-          referrerpolicy="no-referrer"
-          allowtransparency="true"></iframe>
-      </div>
-
-      <!-- TIP ALERT – wyśrodkowany na pełnym obszarze -->
-      <div id="tipAlert" class="box cover-full">
-        <iframe title="Tipply Tip Alert"
-          src="https://widgets.tipply.pl/TIP_ALERT/45acbc83-f00e-41a6-bbcd-4e8078ae7923"
-          allow="autoplay; clipboard-read; clipboard-write; microphone; speakers"
-          referrerpolicy="no-referrer"
-          allowtransparency="true"></iframe>
-      </div>
-
-      <!-- TOP DONATE – lewy górny róg -->
-      <div id="topDonate" class="box top-left" style="width: 820px; height: 220px;">
-        <iframe title="Tipply Top Donate"
-          src="https://widgets.tipply.pl/LARGEST_MESSAGES/45acbc83-f00e-41a6-bbcd-4e8078ae7923/7e2ac059-e6d8-448f-8a00-99a8bbd85780"
-          allow="autoplay; clipboard-read; clipboard-write"
-          referrerpolicy="no-referrer"
-          allowtransparency="true"></iframe>
-      </div>
-
-      <!-- LAST DONATE – prawy dolny róg -->
-      <div id="lastDonate" class="box bottom-right" style="width: 560px; height: 140px; bottom: -16px;">
-        <iframe title="Tipply Last Donate"
-          src="https://widgets.tipply.pl/LATEST_MESSAGES/45acbc83-f00e-41a6-bbcd-4e8078ae7923/8bb96f04-e8dc-4b7e-8e68-a032c3335840"
-          allow="autoplay; clipboard-read; clipboard-write"
-          referrerpolicy="no-referrer"
-          allowtransparency="true"></iframe>
-      </div>
-
-      <!-- CEL DONATE – lewy dolny róg -->
-      <div id="goal" class="box bottom-left w-small">
-        <iframe title="Tipply Goal"
-          src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b"
-          allow="autoplay; clipboard-read; clipboard-write"
-          referrerpolicy="no-referrer"
-          allowtransparency="true"></iframe>
-      </div>
-
-    </div>
+  <div id="root">
+    <iframe id="botrix" allow="autoplay; clipboard-read; clipboard-write" allowtransparency="true"></iframe>
+    <iframe id="tipply-goal" allow="autoplay" allowtransparency="true"></iframe>
+    <div id="debug"></div>
   </div>
 
   <script>
-    (function() {
-      const canvas = document.getElementById('canvas');
-      function fit() {
-        const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
-        const x = (window.innerWidth  - 1920 * scale) / 2;
-        const y = (window.innerHeight - 1080 * scale) / 2;
-        canvas.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+    // Minimalne komentarze "dlaczego": zapewniamy łatwe strojenie w OBS bez edycji pliku.
+
+    const params = new URLSearchParams(location.search);
+
+    // Twoje domyślne linki (można nadpisać parametrami ?botrix=...&goal=...)
+    const DEFAULT_BOTRIX = "https://botrix.live/alerts?bid=mImY0SOSfEEnIbMs4UPHNg";
+    const DEFAULT_TIPPLY_GOAL = "https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b";
+
+    const botrixUrl = safeUrl(params.get("botrix") || DEFAULT_BOTRIX);
+    const goalUrl   = safeUrl(params.get("goal")   || DEFAULT_TIPPLY_GOAL);
+
+    // Pozycjonowanie i rozmiar celu
+    const goalPos   = (params.get("goalPos") || "top-right").toLowerCase(); // top-right | top-left | bottom-right | bottom-left | custom
+    const goalX     = toNum(params.get("goalX"), 24);   // px od lewej (dla custom) lub od krawędzi wynikowej
+    const goalY     = toNum(params.get("goalY"), 24);   // px od góry (dla custom) lub od krawędzi wynikowej
+    const goalW     = toNum(params.get("goalW"), 420);  // bazowa szerokość
+    const goalH     = toNum(params.get("goalH"), 140);  // bazowa wysokość
+    const goalScale = clamp(toNum(params.get("goalScale"), 1), 0.25, 4);
+
+    // Debug
+    const debugOn = params.get("debug") === "1";
+
+    const botrixIframe = document.getElementById("botrix");
+    const tipplyIframe = document.getElementById("tipply-goal");
+    const debugBox = document.getElementById("debug");
+
+    // Cache-buster (ważne w OBS po zmianach)
+    botrixIframe.src = withCacheBuster(botrixUrl);
+    tipplyIframe.src = withCacheBuster(goalUrl);
+
+    // Botrix: pełny ekran
+    Object.assign(botrixIframe.style, { width: "100%", height: "100%" });
+
+    // Tipply: rozmiar + skala
+    Object.assign(tipplyIframe.style, {
+      width: `${goalW}px`,
+      height: `${goalH}px`,
+      transform: `scale(${goalScale})`
+    });
+
+    // Ustal rogi lub custom
+    applyCornerPosition(tipplyIframe, goalPos, goalX, goalY);
+
+    // Prosty status ładowania (do diagnostyki)
+    let botrixReady = false, tipplyReady = false;
+    botrixIframe.addEventListener("load", () => { botrixReady = true; renderDebug(); }, { once: true });
+    tipplyIframe.addEventListener("load", () => { tipplyReady = true; renderDebug(); }, { once: true });
+
+    // Awaryjny reload, jeśli któreś nie wstanie
+    setTimeout(() => {
+      if (!botrixReady) botrixIframe.src = withCacheBuster(botrixUrl);
+      if (!tipplyReady) tipplyIframe.src = withCacheBuster(goalUrl);
+    }, 7000);
+
+    function applyCornerPosition(el, pos, x, y) {
+      const corners = ["top-left","top-right","bottom-left","bottom-right"];
+      // Reset
+      el.style.top = el.style.right = el.style.bottom = el.style.left = "auto";
+
+      if (pos === "custom") { el.style.left = `${x}px`; el.style.top = `${y}px`; return; }
+
+      if (!corners.includes(pos)) pos = "top-right";
+      const [v, h] = pos.split("-");
+      el.style[v] = `${y}px`;
+      el.style[h === "right" ? "right" : "left"] = `${x}px`;
+    }
+
+    function withCacheBuster(url) {
+      try {
+        const u = new URL(url);
+        u.searchParams.set("_cb", String(Date.now()));
+        return u.toString();
+      } catch {
+        // W razie braku absolutnego URL (ale tu i tak mamy absolutne)
+        const sep = url.includes("?") ? "&" : "?";
+        return `${url}${sep}_cb=${Date.now()}`;
       }
-      window.addEventListener('resize', fit);
-      fit();
-    })();
+    }
+
+    function safeUrl(u) {
+      // Prosta ochrona: tylko http(s)
+      if (!/^https?:\/\//i.test(u)) throw new Error("Nieprawidłowy URL.");
+      return u;
+    }
+
+    function toNum(val, fallback) {
+      const n = Number(val);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function clamp(n, min, max) {
+      return Math.min(max, Math.max(min, n));
+    }
+
+    function renderDebug() {
+      if (!debugOn) return;
+      debugBox.style.display = "block";
+      debugBox.textContent = `Botrix: ${botrixReady ? "OK" : "…"} | Tipply Goal: ${tipplyReady ? "OK" : "…"} | ${screen.width}x${screen.height}`;
+    }
+
+    // Uwaga: jeśli któraś usługa zabrania osadzania (X-Frame-Options/CSP), nie obejdziemy tego w przeglądarce/OBS.
   </script>
 </body>
 </html>
