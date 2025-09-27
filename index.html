@@ -1,65 +1,100 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <title>Overlay do YoloBox</title>
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: transparent;
-    }
-    .overlay {
-      position: absolute;
-      transform: translate(-50%, -50%);
-    }
-    /* Środek ekranu (Botrix + Tipply Alert) */
-    #botrix, #tipply-alert {
-      top: 50%;
-      left: 50%;
-    }
-    /* Cel donate na dole */
-    #tipply-goal {
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      position: absolute;
-    }
-    /* Prawy górny róg = Last Donate */
-    #tipply-last {
-      top: 10px;
-      right: 10px;
-      transform: none;
-    }
-    /* Lewy górny róg = Top 3 Donate */
-    #tipply-top {
-      top: 10px;
-      left: 10px;
-      transform: none;
-    }
-    iframe {
-      border: none;
-      width: 400px;
-      height: 200px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Overlay YoloBox</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root{
+    /* rozmiary widgetów – dopasujesz jak trzeba */
+    --w-botrix: 800;      --h-botrix: 450;      --scale-botrix: 1.0;
+    --w-tipalert: 800;    --h-tipalert: 450;    --scale-tipalert: 1.0;
+    --w-goal: 900;        --h-goal: 160;        --scale-goal: 0.95;
+    --w-last: 520;        --h-last: 220;        --scale-last: 0.9;
+    --w-top: 520;         --h-top: 220;         --scale-top: 0.9;
+
+    /* marginesy od krawędzi czarnego płótna 1920x1080 */
+    --pad: 24px;
+    --pad-bottom: 48px; /* dla goal/last, żeby nie kleiło się do krawędzi */
+  }
+
+  html,body{margin:0;height:100%;background:transparent;overflow:hidden;}
+
+  /* Płótno 16:9 jak w OBS/YoloBox, centrowane i niereskalujące widgetów */
+  .stage{position:fixed;inset:0;background:transparent;pointer-events:none;}
+  @media (min-aspect-ratio:16/9){
+    .stage{width:calc(100vh * 16/9);height:100vh;left:calc(50% - (100vh * 16/9)/2);}
+  }
+  @media (max-aspect-ratio:16/9){
+    .stage{width:100vw;height:calc(100vw * 9/16);top:calc(50% - (100vw * 9/16)/2);}
+  }
+
+  .box{position:absolute;transform-origin:center center;pointer-events:auto;}
+  iframe{border:0;background:transparent;}
+
+  /* ALERTY – środek (w OBS nie widać, dopóki nie poleci event) */
+  #botrix{left:50%;top:50%;transform:translate(-50%,-50%) scale(var(--scale-botrix));}
+  #tipalert{left:50%;top:50%;transform:translate(-50%,-50%) scale(var(--scale-tipalert));}
+
+  /* CEL – środek dół */
+  #goal{
+    left:50%;bottom:var(--pad-bottom);
+    transform:translateX(-50%) scale(var(--scale-goal));
+  }
+
+  /* LAST DONATE – prawy dół */
+  #last{
+    right:var(--pad);bottom:var(--pad-bottom);
+    transform:scale(var(--scale-last));
+  }
+
+  /* TOP 3 – lewy góra */
+  #top{
+    left:var(--pad);top:var(--pad);
+    transform:scale(var(--scale-top));
+  }
+</style>
 </head>
 <body>
+  <div class="stage">
+    <!-- TOP 3 (lewy góry) -->
+    <div id="top" class="box">
+      <iframe
+        src="https://widgets.tipply.pl/LARGEST_MESSAGES/45acbc83-f00e-41a6-bbcd-4e8078ae7923/7e2ac059-e6d8-448f-8a00-99a8bbd85780"
+        width="calc(var(--w-top) * 1px)" height="calc(var(--h-top) * 1px)">
+      </iframe>
+    </div>
 
-  <!-- Botrix Alerts -->
-  <iframe id="botrix" class="overlay" src="https://botrix.live/alerts?bid=mImY0SOSfEEnIbMs4UPHNg"></iframe>
+    <!-- LAST DONATE (prawy dół) -->
+    <div id="last" class="box">
+      <iframe
+        src="https://widgets.tipply.pl/LATEST_MESSAGES/45acbc83-f00e-41a6-bbcd-4e8078ae7923/8bb96f04-e8dc-4b7e-8e68-a032c3335840"
+        width="calc(var(--w-last) * 1px)" height="calc(var(--h-last) * 1px)">
+      </iframe>
+    </div>
 
-  <!-- Tipply Donate Alert -->
-  <iframe id="tipply-alert" class="overlay" src="https://widgets.tipply.pl/TIP_ALERT/45acbc83-f00e-41a6-bbcd-4e8078ae7923"></iframe>
+    <!-- CEL (środek dół) -->
+    <div id="goal" class="box">
+      <iframe
+        src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b"
+        width="calc(var(--w-goal) * 1px)" height="calc(var(--h-goal) * 1px)">
+      </iframe>
+    </div>
 
-  <!-- Tipply Goal -->
-  <iframe id="tipply-goal" src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b"></iframe>
+    <!-- ALERTY (środek) -->
+    <div id="botrix" class="box">
+      <iframe
+        src="https://botrix.live/alerts?bid=mImY0SOSfEEnIbMs4UPHNg"
+        width="calc(var(--w-botrix) * 1px)" height="calc(var(--h-botrix) * 1px)">
+      </iframe>
+    </div>
 
-  <!-- Tipply Last Donate -->
-  <iframe id="tipply-last" src="https://widgets.tipply.pl/LATEST_MESSAGES/45acbc83-f00e-41a6-bbcd-4e8078ae7923/8bb96f04-e8dc-4b7e-8e68-a032c3335840"></iframe>
-
-  <!-- Tipply Top 3 Donate -->
-  <iframe id="tipply-top" src="https://widgets.tipply.pl/LARGEST_MESSAGES/45acbc83-f00e-41a6-bbcd-4e8078ae7923/7e2ac059-e6d8-448f-8a00-99a8bbd85780"></iframe>
-
+    <div id="tipalert" class="box">
+      <iframe
+        src="https://widgets.tipply.pl/TIP_ALERT/45acbc83-f00e-41a6-bbcd-4e8078ae7923"
+        width="calc(var(--w-tipalert) * 1px)" height="calc(var(--h-tipalert) * 1px)">
+      </iframe>
+    </div>
+  </div>
 </body>
 </html>
