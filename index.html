@@ -11,13 +11,10 @@
       overflow: hidden; 
     }
 
-    /* --- Tipply: cel donate (środek ekranu) --- */
+    /* --- Tipply: cel donate (teraz dół, centralnie) --- */
     .tipply-goal {
       position: fixed;
       inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       pointer-events: none;
     }
     .tipply-goal iframe {
@@ -26,12 +23,12 @@
       width: 1920px;
       height: 1080px;
       position: absolute;
-      top: 0;
       left: 50%;
-      transform: translate(-50%, 360px); /* przesunięcie w pionie jak Botrix */
+      bottom: 0;
+      transform: translateX(-50%) scale(1);
     }
 
-    /* --- Botrix: alerty, idealnie środek ekranu --- */
+    /* --- Botrix: alerty, środek ekranu --- */
     .botrix-alerts {
       position: fixed;
       inset: 0;
@@ -43,16 +40,19 @@
     .botrix-alerts iframe {
       border: 0;
       background: transparent;
-      width: 1920px;   /* pełne płótno */
+      width: 1920px;
       height: 1080px;
       transform-origin: top center;
       transform: translateY(360px); 
     }
 
-    /* --- Tipply: powiadomienie donate (środek ekranu) --- */
+    /* --- Tipply: powiadomienie donate --- */
     .tipply-alert {
       position: fixed;
       inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       pointer-events: none;
     }
     .tipply-alert iframe {
@@ -60,15 +60,13 @@
       background: transparent;
       width: 1920px;
       height: 1080px;
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translate(-50%, 360px);
+      transform-origin: top center;
+      transform: translateY(360px);
     }
   </style>
 </head>
 <body>
-  <!-- Tipply goal -->
+  <!-- Tipply goal (środek, dół) -->
   <div class="tipply-goal">
     <iframe
       src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b"
