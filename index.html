@@ -2,67 +2,65 @@
 <html lang="pl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Overlay 1080p – Tipply Goal</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Overlay – Tipply Goal (DEBUG)</title>
   <style>
-    :root{
-      /* USTAWIENIA: dopasuj pozycję/skalę widgetu */
-      --goal-x: 32px;      /* odsunięcie od lewej krawędzi */
-      --goal-y: 32px;      /* odsunięcie od dolnej krawędzi */
-      --goal-scale: 1;     /* 0.5 = 50%, 1 = 100%, 1.2 = 120% itd. */
-      --stage-w: 1920px;
-      --stage-h: 1080px;
+    /* Cały ekran, zero kombinacji */
+    html,body{height:100%;margin:0;background:transparent;overflow:hidden;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+
+    /* Debug: pokaż gdzie jest kontener */
+    .goal-wrap{
+      position:fixed;
+      left:2vw;           /* przesuń od lewej */
+      bottom:2vw;         /* przesuń od dołu */
+      transform-origin:bottom left;
+      transform:scale(var(--scale,1));
+      z-index:9999;
+      /* DEBUG: obrys i delikatne tło – usuń jak będzie ok */
+      outline:2px dashed rgba(255,255,255,.6);
+      background:rgba(0,0,0,.05);
+      border-radius:8px;
+      padding:0;
     }
 
-    /* Pełnoekranowa, przezroczysta scena */
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      background: transparent;
-      overflow: hidden;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    /* Sam iframe – daję większy rozmiar bazowy; skaluj zmienną --scale */
+    iframe{
+      display:block;
+      width:700px;        /* dopasujesz skalą poniżej */
+      height:260px;
+      border:0;
+      background:transparent;
     }
 
-    /* „Scena” 1920×1080 (YoloBox przeglądarka też powinna mieć 1080p) */
-    .stage {
-      position: fixed;
-      inset: 0;
-      width: var(--stage-w);
-      height: var(--stage-h);
-      margin: auto;
-      background: transparent;
-      pointer-events: none; /* overlay nie łapie klików */
-    }
-
-    /* Kontener celu donate – lewy dolny róg */
-    .goal {
-      position: absolute;
-      left: var(--goal-x);
-      bottom: var(--goal-y);
-      transform-origin: bottom left;
-      transform: scale(var(--goal-scale));
-      z-index: 10;
-    }
-
-    /* Sam iframe */
-    .goal iframe {
-      display: block;
-      border: 0;
-      width: 600px;   /* bazowe wymiary – zmieniaj skalą powyżej */
-      height: 220px;  /* dopasuj jeśli chcesz, ale lepiej skalą */
-      background: transparent;
+    /* Mini panel do szybkiej zmiany skali bez edycji kodu (kliknij/stuknij) */
+    .ctrl{
+      position:fixed; right:8px; top:8px; z-index:10000;
+      font-size:12px; line-height:1; color:#fff; background:rgba(0,0,0,.5);
+      padding:6px 8px; border-radius:6px; user-select:none; cursor:pointer;
     }
   </style>
 </head>
 <body>
-  <div class="stage" aria-hidden="true">
-    <div class="goal">
-      <iframe
-        src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b"
-        allowtransparency="true"
-        scrolling="no">
-      </iframe>
-    </div>
+  <div class="ctrl" onclick="
+    const r=document.documentElement;
+    const cur=parseFloat(getComputedStyle(r).getPropertyValue('--scale'))||1;
+    const next = cur>=1.6 ? 0.8 : +(cur+0.1).toFixed(1);
+    r.style.setProperty('--scale', next);
+    this.textContent='Skala: '+next;
+  ">Skala: 1.0</div>
+
+  <div class="goal-wrap">
+    <iframe
+      src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b"
+      allow="autoplay; fullscreen; clipboard-read; clipboard-write"
+      allowtransparency="true"
+      scrolling="no">
+    </iframe>
+  </div>
+
+  <!-- Fallback tekstowy (gdyby iframe był blokowany) -->
+  <div style="position:fixed;left:2vw;bottom:2vw;z-index:1;color:#fff;font-size:14px;text-shadow:0 1px 2px rgba(0,0,0,.6)">
+    Jeśli nie widzisz ramki powyżej, przeglądarka na urządzeniu blokuje iframe.
   </div>
 </body>
 </html>
