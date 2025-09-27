@@ -63,6 +63,25 @@
       transform-origin: top center;
       transform: translateY(360px);
     }
+
+    /* --- Tipply: Top 3 donate --- */
+    .tipply-top3 {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+      pointer-events: none;
+    }
+    .tipply-top3 iframe {
+      border: 0;
+      background: transparent;
+      width: 1920px;
+      height: 1080px;
+      transform-origin: top left;
+      /* przykładowo w lewym górnym rogu */
+      transform: translate(20px, 20px) scale(1);
+    }
   </style>
 </head>
 <body>
@@ -90,6 +109,16 @@
   <div class="tipply-alert">
     <iframe
       src="https://widgets.tipply.pl/TIP_ALERT/45acbc83-f00e-41a6-bbcd-4e8078ae7923"
+      allowtransparency="true"
+      scrolling="no"
+      referrerpolicy="no-referrer">
+    </iframe>
+  </div>
+
+  <!-- Tipply top 3 donate -->
+  <div class="tipply-top3">
+    <iframe
+      src="https://widgets.tipply.pl/LARGEST_MESSAGES/45acbc83-f00e-41a6-bbcd-4e8078ae7923/7e2ac059-e6d8-448f-8a00-99a8bbd85780"
       allowtransparency="true"
       scrolling="no"
       referrerpolicy="no-referrer">
