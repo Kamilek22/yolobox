@@ -40,19 +40,16 @@
     .botrix-alerts iframe {
       border: 0;
       background: transparent;
-      width: 1920px;   /* pełne płótno */
+      width: 1920px;
       height: 1080px;
       transform-origin: top center;
       transform: translateY(360px); 
     }
 
-    /* --- Tipply: powiadomienie donate (tak samo jak Botrix) --- */
+    /* --- Tipply: powiadomienie donate (dokładnie środek) --- */
     .tipply-alert {
       position: fixed;
       inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       pointer-events: none;
     }
     .tipply-alert iframe {
@@ -60,8 +57,10 @@
       background: transparent;
       width: 1920px;
       height: 1080px;
-      transform-origin: top center;
-      transform: translateY(360px);
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, 360px);
     }
   </style>
 </head>
