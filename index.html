@@ -5,30 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tipply – Cel donate</title>
   <style>
-    /* Twój CSS dla strony-–transparentne tło, brak scrolli */
-    body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }
+    body {
+      background-color: rgba(0, 0, 0, 0);
+      margin: 0;
+      overflow: hidden;
+    }
 
-    /* Kontener na iframe – zajmuje cały ekran */
-    .root { position: fixed; inset: 0; display: grid; place-items: center; }
-
-    /* Sam iframe – bez ramek, dopasowany do zawartości */
-    iframe {
+    /* Cel donate w prawym dolnym rogu */
+    #tipply-goal {
+      position: fixed;
+      bottom: 20px;   /* odległość od dołu ekranu */
+      right: 20px;    /* odległość od prawej */
       border: 0;
       background: transparent;
-      width: 100vw;
-      height: 100vh;
+      width: 500px;   /* szerokość widgetu */
+      height: 150px;  /* wysokość widgetu */
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
-  <div class="root">
-    <iframe
-      src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b"
-      allowtransparency="true"
-      scrolling="no"
-      referrerpolicy="no-referrer"
-    ></iframe>
-  </div>
+  <iframe
+    id="tipply-goal"
+    src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b"
+    allowtransparency="true"
+    scrolling="no"
+    referrerpolicy="no-referrer"
+  ></iframe>
 </body>
 </html>
-
