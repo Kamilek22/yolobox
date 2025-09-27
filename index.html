@@ -5,119 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tipply – Cel donate</title>
   <style>
-    :root{
-      /* <<< TWOJE USTAWIENIA (z obrazka): >>> */
-      --shift-x: -22;   /* px */
-      --shift-y: 685;   /* px */
-      --scale: 1;       /* np. 0.95 */
+    /* Twój CSS dla strony-–transparentne tło, brak scrolli */
+    body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }
 
-      /* Zacznij szerzej, potem zmniejsz */
-      --crop-w: 800px;  /* było 520px – zwiększam, żebyś zobaczył */
-      --crop-h: 260px;  /* było 140px – też większe na start */
+    /* Kontener na iframe – zajmuje cały ekran */
+    .root { position: fixed; inset: 0; display: grid; place-items: center; }
 
-      /* Margines od krawędzi ekranu */
-      --edge: 20px;
-    }
-
-    html,body{height:100%}
-    body{margin:0; background:transparent; overflow:hidden; font-family:system-ui}
-
-    /* ------- PRODUKCJA: przycięty róg ------- */
-    .bottom-right{
-      position: fixed;
-      right: var(--edge);
-      bottom: var(--edge);
-      width: var(--crop-w);
-      height: var(--crop-h);
-      overflow: hidden;
-      pointer-events: none;
-      background: transparent;
-      display: block;        /* domyślnie włączone */
-    }
-    .bottom-right iframe{
-      position: absolute;
-      top: 0; left: 0;
-      width: 1920px;           /* płótno 1080p */
-      height: 1080px;
+    /* Sam iframe – bez ramek, dopasowany do zawartości */
+    iframe {
       border: 0;
       background: transparent;
-      transform-origin: top left;
-      transform: translate(var(--shift-x)*1px, var(--shift-y)*1px) scale(var(--scale));
+      width: 100vw;
+      height: 100vh;
     }
-
-    /* ------- DEBUG: duży podgląd ------- */
-    .stage{
-      position: fixed;
-      inset: var(--edge);
-      overflow: hidden;
-      background: rgba(0,0,0,.35);
-      outline: 2px solid red;
-      display: none;          /* debug wyłączony */
-      pointer-events: none;
-    }
-    .stage iframe{
-      position: absolute;
-      top: 0; left: 0;
-      width: 1920px;
-      height: 1080px;
-      border: 0;
-      background: transparent;
-      transform-origin: top left;
-      transform: translate(var(--shift-x)*1px, var(--shift-y)*1px) scale(var(--scale));
-      outline: 1px dashed yellow;
-    }
-
-    /* Gdy w URL jest ?debug=1 – pokaż debug, schowaj produkcję */
-    body.debug .stage{display:block}
-    body.debug .bottom-right{display:none}
   </style>
 </head>
 <body>
-  <!-- PRODUKCJA -->
-  <div class="bottom-right">
+  <div class="root">
     <iframe
       src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b"
-      allowtransparency="true" scrolling="no" referrerpolicy="no-referrer">
-    </iframe>
+      allowtransparency="true"
+      scrolling="no"
+      referrerpolicy="no-referrer"
+    ></iframe>
   </div>
-
-  <!-- DEBUG -->
-  <div class="stage">
-    <iframe
-      src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b"
-      allowtransparency="true" scrolling="no" referrerpolicy="no-referrer">
-    </iframe>
-  </div>
-
-  <script>
-    // Włącz tryb debug jeśli w URL jest ?debug=1
-    const isDebug = /[?&]debug=1\b/.test(location.search);
-    if (isDebug) document.body.classList.add('debug');
-
-    // Sterowanie tylko w debug: strzałki, +/- (Shift=10px, Ctrl=1px, inaczej=5px)
-    if (isDebug) {
-      document.addEventListener('keydown', e => {
-        const root = document.documentElement;
-        const rs = getComputedStyle(root);
-        let sx = parseFloat(rs.getPropertyValue('--shift-x')) || 0;
-        let sy = parseFloat(rs.getPropertyValue('--shift-y')) || 0;
-        let sc = parseFloat(rs.getPropertyValue('--scale')) || 1;
-        const step = e.shiftKey ? 10 : (e.ctrlKey ? 1 : 5);
-
-        if (e.key === 'ArrowLeft')  sx -= step;
-        if (e.key === 'ArrowRight') sx += step;
-        if (e.key === 'ArrowUp')    sy -= step;
-        if (e.key === 'ArrowDown')  sy += step;
-        if (e.key === '+')          sc = +(sc + 0.05).toFixed(2);
-        if (e.key === '-')          sc = +(sc - 0.05).toFixed(2);
-
-        root.style.setProperty('--shift-x', sx);
-        root.style.setProperty('--shift-y', sy);
-        root.style.setProperty('--scale', sc);
-        console.log({ 'shift-x': sx, 'shift-y': sy, scale: sc });
-        e.preventDefault();
-      });
-    }
-  </script>
 </body>
 </html>
