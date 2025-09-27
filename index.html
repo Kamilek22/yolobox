@@ -8,16 +8,9 @@
   <style>
     html,body{margin:0;padding:0;background:transparent;height:100%;overflow:hidden}
     #root{position:relative;width:100vw;height:100vh}
-
-    /* Botrix na spodzie, full */
     #botrix{position:absolute;inset:0;border:0;background:transparent;z-index:1}
-
-    /* Kontener Tipply zawsze nad Botrixem */
     #tipply-wrap{position:absolute;border:0;background:transparent;z-index:2;pointer-events:none}
-
-    /* Pełny Tipply (wewnątrz wrapa); skaluje się tylko w trybie crop */
     #tipply{position:absolute;border:0;background:transparent;left:0;top:0}
-
     #debug{position:absolute;left:8px;bottom:8px;z-index:99;
       font:12px system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       color:#eee;background:rgba(20,20,20,.7);padding:6px 8px;border-radius:8px;display:none}
@@ -26,17 +19,13 @@
 <body>
   <div id="root">
     <iframe id="botrix" allow="autoplay; clipboard-read; clipboard-write" allowfullscreen></iframe>
-
-    <!-- Wrap pozwala przycinać i pozycjonować Tipply -->
     <div id="tipply-wrap">
       <iframe id="tipply" allow="autoplay" allowfullscreen></iframe>
     </div>
-
     <div id="debug"></div>
   </div>
 
   <script>
-    // Tipply renderuje pełny canvas; full = pokazujemy pełny, crop = przycinamy i skalujemy.
     const P = new URLSearchParams(location.search);
 
     const DEFAULT_BOTRIX = "https://botrix.live/alerts?bid=mImY0SOSfEEnIbMs4UPHNg";
@@ -49,17 +38,16 @@
     const viewportW = toNum(P.get("viewportW"), 1920);
     const viewportH = toNum(P.get("viewportH"), 1080);
 
-    // crop=left,top,width,height (w pikselach, przed skalą)
-    const cropRaw = (P.get("crop") || "").split(",").map(n => Number(n));
+    const cropRaw = (P.get("crop") || "").split(",").map(Number);
     const crop = (cropRaw.length===4 && cropRaw.every(Number.isFinite))
       ? { l:cropRaw[0], t:cropRaw[1], w:cropRaw[2], h:cropRaw[3] }
       : { l:0, t:0, w:viewportW, h:viewportH };
 
     const scale = clamp(toNum(P.get("goalScale"), 1), 0.25, 4);
+    const pos  = (P.get("goalPos") || "top-right").toLowerCase();
 
-    const pos  = (P.get("goalPos") || "top-right").toLowerCase(); // corner for WRAP (crop)
-    const offX = toNum(P.get("goalX"), 0);   // domyślnie 0
-    const offY = toNum(P.get("goalY"), 0);   // domyślnie 0
+    const offX = toNum(P.get("goalX"), 0);
+    const offY = toNum(P.get("goalY"), 0);
 
     const debugOn = P.get("debug")==="1";
 
@@ -68,42 +56,33 @@
     const $tipply = document.getElementById("tipply");
     const $dbg    = document.getElementById("debug");
 
-    // Botrix fullscreen
     Object.assign($botrix.style, { width:"100%", height:"100%" });
     $botrix.src = withCB(botrixUrl);
 
     if (mode === "full") {
-      // Wrap pełnoekranowy, ale przesuwamy go transformatą
+      // Dlaczego: nie możemy modyfikować DOM w iframe; przesuwamy cały iframe Tipply.
       Object.assign($wrap.style, {
-        inset: "0",
-        width: "100%",
-        height: "100%",
-        overflow: "visible",
-        transformOrigin: "top left",
-        transform: `translate(${offX}px, ${offY}px)` // << kluczowe przesunięcie
+        inset:"0", width:"100%", height:"100%", overflow:"visible"
       });
 
-      // Iframe Tipply wypełnia wrap bez dodatkowych offsetów
-      Object.assign($tipply.style, {
+      // Wymuszamy transform z !important w razie styli osadzonych przez Tipply.
+      setImportant($tipply, {
         width: "100%",
         height: "100%",
-        left: "0",
-        top: "0"
+        left: "0px",
+        top: "0px",
+        "transform-origin": "top left",
+        "transform": `translate(${offX}px, ${offY}px)`
       });
     } else {
-      // Tryb crop: viewport Tipply 1920x1080 (lub param), przycinamy prostokąt i skalujemy
       const wrapW = crop.w * scale;
       const wrapH = crop.h * scale;
 
       resetEdges($wrap);
       const [v, h] = pickCorner(pos);
-      $wrap.style[v] = `${offY}px`;
-      $wrap.style[h] = `${offX}px`;
-      Object.assign($wrap.style, {
-        width: `${wrapW}px`,
-        height: `${wrapH}px`,
-        overflow: "hidden"
-      });
+      $wrap.style[v] = `${toNum(P.get("goalY"), 24)}px`;
+      $wrap.style[h] = `${toNum(P.get("goalX"), 24)}px`;
+      Object.assign($wrap.style, { width:`${wrapW}px`, height:`${wrapH}px`, overflow:"hidden" });
 
       Object.assign($tipply.style, {
         width: `${viewportW}px`,
@@ -115,15 +94,12 @@
       });
     }
 
-    // Ładuj Tipply
     $tipply.src = withCB(tipplyUrl);
 
-    // Debug status
     let botrixReady=false, tipplyReady=false;
     $botrix.addEventListener("load", ()=>{ botrixReady=true; renderDebug(); }, {once:true});
     $tipply.addEventListener("load", ()=>{ tipplyReady=true; renderDebug(); }, {once:true});
 
-    // Awaryjny reload (czasem overlay nie strzela 'load' przez CSP)
     setTimeout(()=>{ if(!botrixReady) $botrix.src = withCB(botrixUrl);
                      if(!tipplyReady) $tipply.src = withCB(tipplyUrl); }, 7000);
 
@@ -134,13 +110,14 @@
     function clamp(n,a,b){ return Math.min(b,Math.max(a,n)) }
     function resetEdges(el){ el.style.top=el.style.right=el.style.bottom=el.style.left="auto" }
     function pickCorner(p){ return (["top-left","top-right","bottom-left","bottom-right"].includes(p)?p:"top-right").split("-") }
+    function setImportant(el, obj){ for(const [k,v] of Object.entries(obj)) el.style.setProperty(k, v, "important"); }
     function renderDebug(){
       if(!debugOn) return;
       $dbg.style.display="block";
-      $dbg.textContent = `Botrix:${botrixReady?"OK":"…"} | Tipply:${tipplyReady?"OK":"…"} | mode:${mode} | shift:${offX}x${offY}`;
+      $dbg.textContent = `Botrix:${botrixReady?"OK":"…"} | Tipply:${tipplyReady?"OK":"…"} | mode:${mode} | offset:${offX}x${offY}`;
     }
 
-    // Jeżeli Tipply zablokuje osadzanie (CSP), dodaj Tipply jako osobny Browser Source – zgodnie z ich instrukcją.
+    // Jeżeli Tipply zablokuje osadzanie (CSP), dodaj Tipply jako osobny Browser Source – to zgodne z ich instrukcją.
   </script>
 </body>
 </html>
