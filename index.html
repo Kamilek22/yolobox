@@ -3,34 +3,51 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tipply – Cel donate</title>
+  <title>Tipply – Cel donate (crop)</title>
   <style>
-    body {
-      background-color: rgba(0, 0, 0, 0);
-      margin: 0;
-      overflow: hidden;
+    :root{
+      /* <<< DOSTOSUJ TE 3 ZMIENNE >>> */
+      --shift-x: -60;   /* px: przesunięcie zawartości w poziomie */
+      --shift-y: -40;   /* px: przesunięcie zawartości w pionie  */
+      --scale: 1;       /* np. 0.9 lub 1.2 */
     }
 
-    /* Cel donate w prawym dolnym rogu */
-    #tipply-goal {
+    body { background: transparent; margin: 0; overflow: hidden; }
+
+    /* Małe okno w rogu – tu „przycina się” iframe */
+    .goal-wrap{
       position: fixed;
-      bottom: 20px;   /* odległość od dołu ekranu */
-      right: 20px;    /* odległość od prawej */
+      right: 20px;         /* zmień na left:20px; jeśli ma być lewy dół */
+      bottom: 20px;
+      width: 520px;        /* szerokość widocznego paska (dostosuj) */
+      height: 120px;       /* wysokość widocznego paska (dostosuj) */
+      overflow: hidden;
+      pointer-events: none;
+      background: transparent;
+    }
+
+    /* Cały widget w środku, przesuwamy go i ewentualnie skalujemy */
+    .goal-wrap iframe{
+      position: relative;
+      width: 1920px;       /* wirtualne „płótno” */
+      height: 1080px;
       border: 0;
       background: transparent;
-      width: 500px;   /* szerokość widgetu */
-      height: 150px;  /* wysokość widgetu */
-      pointer-events: none;
+      transform-origin: top left;
+      transform:
+        translate(calc(var(--shift-x) * 1px), calc(var(--shift-y) * 1px))
+        scale(var(--scale));
     }
   </style>
 </head>
 <body>
-  <iframe
-    id="tipply-goal"
-    src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b"
-    allowtransparency="true"
-    scrolling="no"
-    referrerpolicy="no-referrer"
-  ></iframe>
+  <div class="goal-wrap">
+    <iframe
+      src="https://widgets.tipply.pl/TIPS_GOAL/45acbc83-f00e-41a6-bbcd-4e8078ae7923/GOAL/284aa312-53e1-460c-8424-70880828c41b"
+      allowtransparency="true"
+      scrolling="no"
+      referrerpolicy="no-referrer">
+    </iframe>
+  </div>
 </body>
 </html>
